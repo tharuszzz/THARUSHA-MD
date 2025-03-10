@@ -11,5 +11,4 @@ module.exports = {
   PREFIX: process.env.PREFIX || ".",
   ALIVE_IMG: process.env.ALIVE_IMG || "https://i.ibb.co/4wtknv1M/cadad92b37c06b76.jpg",
   ALIVE_MSG: process.env.ALIVE_MSG || "👋 Hellow I`m alive now ♲",
-  AUTO_READ_STATUS: process.ebv.AUTO_READ_STATUS || "true",
 };
