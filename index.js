@@ -61,7 +61,7 @@ async function connectToWA() {
   const prefix = config.PREFIX;
   //===========================
 
-  console.log("Connecting ❤️𝐑_𝐎_𝐁_𝐈_𝐍❤️");
+  console.log("Connecting 🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳");
   const { state, saveCreds } = await useMultiFileAuthState(
     __dirname + "/auth_info_baileys/"
   );
@@ -92,21 +92,21 @@ async function connectToWA() {
           require("./plugins/" + plugin);
         }
       });
-      console.log("❤️𝐑_𝐎_𝐁_𝐈_𝐍❤️ installed successful ✅");
-      console.log("❤️𝐑_𝐎_𝐁_𝐈_𝐍❤️ connected to whatsapp ✅");
+      console.log("installed successful ✅");
+      console.log("🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳connected to whatsapp ✅");
 
-      let up = `❤️𝐑_𝐎_𝐁_𝐈_𝐍❤️ connected successful ✅`;
-      let up1 = `Hello Robin, I made bot successful`;
+      let up = `🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳 connected successful ✅`;
+      let up1 = `↔️ *𝗬𝗼𝘂𝗿 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝘀𝗲𝘁𝘁𝗶𝗻𝗴𝘀* ↔️\n┌──────────────────────\n├ *`PREFIX:`* .\n├ *`POWER:`* on\n├ *`LANGUAGE:`* english\n├ *`BUTTONS:`* false\n├ *`WORK_TYPE:`* private\n├ *`ANTI_DELETE:`* false\n├ *`ANTI_VIEW_ONCE:`* false\n├ *`AUTO_VOICE:`* false\n├ *`AUTO_REACT:`* false\n├ *`COMPOSING:`* true\n├ *`USER_REACT:`* 🎀\n├ *`USER_REACT_STATUS:`* false\n├ *`AUTO_STICKER:`* false\n├ *`AUTO_RESTART:`* false\n├ *`READ_MESSAGE:`* commands\n├ *`ALWAYS_ONLINE:`* true\n├ *`ANTI_BAD:`* false\n├ *`ANTI_BAD_ACTION:`* delete\n├ *`ANTI_LINK:`* false\n├ *`ANTI_LINK_VALUE:`* chat.whatsapp.com\n├ *`ANTI_LINK_ACTION:`* delete\n├ *`ANTI_BOT:`* false\n├ *`AUTO_READ_STATUS:`* true\n├ *`MAX_SIZE:`* 150\n├ *`SUDO:`* 94740326138\n├ *`LOGO:`* https://i.ibb.co/5XtBkGSJ/a4be94e5e6a1b384.jpg\n├ *`ALIVE_MESSAGE:`* *Hey, I'm @botname , created by tharusha sandipa 👤*\nI'm always here for help you. 😇 Love you forever ♥️\n└──────────────────────`;
 
       robin.sendMessage(ownerNumber + "@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Dark-Robin/Bot-Helper/refs/heads/main/autoimage/Bot%20robin%20cs.jpg`,
+          url: `https://i.ibb.co/1J9Xp6gJ/304909ee1ba2d9fa.jpg`,
         },
         caption: up,
       });
-      robin.sendMessage("94705900209@s.whatsapp.net", {
+      robin.sendMessage("94740326138@s.whatsapp.net", {
         image: {
-          url: `https://raw.githubusercontent.com/Dark-Robin/Bot-Helper/refs/heads/main/autoimage/Bot%20robin%20cs.jpg`,
+          url: `https://i.ibb.co/1J9Xp6gJ/304909ee1ba2d9fa.jpg`,
         },
         caption: up1,
       });
@@ -395,7 +395,7 @@ async function connectToWA() {
   });
 }
 app.get("/", (req, res) => {
-  res.send("hey, ❤️𝐑_𝐎_𝐁_𝐈_𝐍❤️ started✅");
+  res.send("hey,i'm started✅");
 });
 app.listen(port, () =>
   console.log(`Server listening on port http://localhost:${port}`)
