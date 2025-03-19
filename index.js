@@ -12,7 +12,7 @@ const express = require("express");
 const config = require("./config");
 
 const sessionPath = __dirname + "/auth_info_baileys/";
-const ownerNumber = config.OWNER_NUM + "@s.whatsapp.net"; // Owner Number
+const ownerNumber = config.OWNER_NUM + "94740326138@s.whatsapp.net"; // Owner Number
 
 const app = express();
 const port = process.env.PORT || 8000;
