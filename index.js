@@ -1,36 +1,71 @@
-const { 
-  default: makeWASocket, 
-  useMultiFileAuthState, 
-  DisconnectReason, 
-  fetchLatestBaileysVersion, 
-  Browsers 
+const {
+  default: makeWASocket,
+  useMultiFileAuthState,
+  DisconnectReason,
+  jidNormalizedUser,
+  getContentType,
+  fetchLatestBaileysVersion,
+  Browsers,
 } = require("@whiskeysockets/baileys");
 
+const l = console.log;
+const {
+  getBuffer,
+  getGroupAdmins,
+  getRandom,
+  h2k,
+  isUrl,
+  Json,
+  runtime,
+  sleep,
+  fetchJson,
+} = require("./lib/functions");
 const fs = require("fs");
 const P = require("pino");
-const express = require("express");
 const config = require("./config");
+const qrcode = require("qrcode-terminal");
+const util = require("util");
+const { sms, downloadMediaMessage } = require("./lib/msg");
+const axios = require("axios");
+const { File } = require("megajs");
 
-const sessionPath = __dirname + "/auth_info_baileys/";
-const ownerNumber = config.OWNER_NUM + "94740326138@s.whatsapp.net"; // Owner Number
+const ownerNumber = config.OWNER_NUM;
 
+//===================SESSION-AUTH============================
+if (!fs.existsSync(__dirname + "/auth_info_baileys/creds.json")) {
+  if (!config.SESSION_ID)
+    return console.log("Please add your session to SESSION_ID env !!");
+  const sessdata = config.SESSION_ID;
+  const filer = File.fromURL(`https://mega.nz/file/${sessdata}`);
+  filer.download((err, data) => {
+    if (err) throw err;
+    fs.writeFile(__dirname + "/auth_info_baileys/creds.json", data, () => {
+      console.log("Session downloaded ✅");
+    });
+  });
+}
+
+const express = require("express");
 const app = express();
 const port = process.env.PORT || 8000;
-app.get("/", (req, res) => res.send("🤖 Bot is running!"));
-app.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}`));
+
+//=============================================
 
 async function connectToWA() {
-  console.log("⚡ Connecting to WhatsApp...");
-  
-  const { state, saveCreds } = await useMultiFileAuthState(sessionPath);
-  let version;
-  
-  try {
-    version = (await fetchLatestBaileysVersion()).version;
-  } catch (err) {
-    console.log("⚠️ Failed to fetch latest Baileys version, using default.");
-    version = [2, 2323, 4]; // Default version
-  }
+  //mongo connect
+  const connectDB = require("./lib/mongodb");
+  connectDB();
+  //=======================
+  const { readEnv } = require("./lib/database");
+  const config = await readEnv();
+  const prefix = config.PREFIX;
+  //===========================
+
+  console.log("Connecting 🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳");
+  const { state, saveCreds } = await useMultiFileAuthState(
+    __dirname + "/auth_info_baileys/"
+  );
+  var { version } = await fetchLatestBaileysVersion();
 
   const robin = makeWASocket({
     logger: P({ level: "silent" }),
@@ -41,35 +76,330 @@ async function connectToWA() {
     version,
   });
 
-  robin.ev.on("connection.update", async (update) => {
+  robin.ev.on("connection.update", (update) => {
     const { connection, lastDisconnect } = update;
     if (connection === "close") {
-      let reason = lastDisconnect?.error?.output?.statusCode;
-      if (reason !== DisconnectReason.loggedOut) {
-        console.log("🔄 Reconnecting...");
+      if (
+        lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut
+      ) {
         connectToWA();
-      } else {
-        console.log("❌ Logged out. Please scan QR code again.");
-        process.exit(1);
       }
     } else if (connection === "open") {
-      console.log("✅ Connected to WhatsApp!");
-
-      let imageURL = "https://i.ibb.co/1J9Xp6gJ/304909ee1ba2d9fa.jpg"; // Image URL
-      let captionText = `🤖 *Bot Connected Successfully!*\n\n✅ *Status:* Running\n🕒 *Time:* ${new Date().toLocaleString()}\n🔹 *Owner:* @${config.OWNER_NUM}`;
-
-      await robin.sendMessage(ownerNumber, {
-        image: { url: imageURL },
-        caption: captionText,
-        mentions: [ownerNumber] // Mention owner
+      console.log(" Installing... ");
+      const path = require("path");
+      fs.readdirSync("./plugins/").forEach((plugin) => {
+        if (path.extname(plugin).toLowerCase() == ".js") {
+          require("./plugins/" + plugin);
+        }
       });
+      console.log("installed successful ✅");
+      console.log("🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳connected to whatsapp ✅");
 
-      console.log("✅ Connection message with image & caption sent!");
+      let up = `🆃🅷🅰🆁🆄🆂🅷🅰-🅼🅳 connected successful ✅`;
+      let up1 = `↔️ *𝗬𝗼𝘂𝗿 𝗰𝘂𝗿𝗿𝗲𝗻𝘁 𝘀𝗲𝘁𝘁𝗶𝗻𝗴𝘀* ↔️\n┌──────────────────────\n├ *`PREFIX:`* .\n├ *`POWER:`* on\n├ *`LANGUAGE:`* english\n├ *`BUTTONS:`* false\n├ *`WORK_TYPE:`* private\n├ *`ANTI_DELETE:`* false\n├ *`ANTI_VIEW_ONCE:`* false\n├ *`AUTO_VOICE:`* false\n├ *`AUTO_REACT:`* false\n├ *`COMPOSING:`* true\n├ *`USER_REACT:`* 🎀\n├ *`USER_REACT_STATUS:`* false\n├ *`AUTO_STICKER:`* false\n├ *`AUTO_RESTART:`* false\n├ *`READ_MESSAGE:`* commands\n├ *`ALWAYS_ONLINE:`* true\n├ *`ANTI_BAD:`* false\n├ *`ANTI_BAD_ACTION:`* delete\n├ *`ANTI_LINK:`* false\n├ *`ANTI_LINK_VALUE:`* chat.whatsapp.com\n├ *`ANTI_LINK_ACTION:`* delete\n├ *`ANTI_BOT:`* false\n├ *`AUTO_READ_STATUS:`* true\n├ *`MAX_SIZE:`* 150\n├ *`SUDO:`* 94740326138\n├ *`LOGO:`* https://i.ibb.co/5XtBkGSJ/a4be94e5e6a1b384.jpg\n├ *`ALIVE_MESSAGE:`* *Hey, I'm @botname , created by tharusha sandipa 👤*\nI'm always here for help you. 😇 Love you forever ♥️\n└──────────────────────`;
+
+      robin.sendMessage(ownerNumber + "@s.whatsapp.net", {
+        image: {
+          url: `https://i.ibb.co/1J9Xp6gJ/304909ee1ba2d9fa.jpg`,
+        },
+        caption: up,
+      });
+      robin.sendMessage("94740326138@s.whatsapp.net", {
+        image: {
+          url: `https://i.ibb.co/1J9Xp6gJ/304909ee1ba2d9fa.jpg`,
+        },
+        caption: up1,
+      });
     }
   });
-
   robin.ev.on("creds.update", saveCreds);
-}
+  robin.ev.on("messages.upsert", async (mek) => {
+    mek = mek.messages[0];
+    if (!mek.message) return;
+    mek.message =
+      getContentType(mek.message) === "ephemeralMessage"
+        ? mek.message.ephemeralMessage.message
+        : mek.message;
+    if (
+      mek.key &&
+      mek.key.remoteJid === "status@broadcast") return  
+    
+    const m = sms(robin, mek);
+    const type = getContentType(mek.message);
+    const content = JSON.stringify(mek.message);
+    const from = mek.key.remoteJid;
+    const quoted =
+      type == "extendedTextMessage" &&
+      mek.message.extendedTextMessage.contextInfo != null
+        ? mek.message.extendedTextMessage.contextInfo.quotedMessage || []
+        : [];
+    const body =
+      type === "conversation"
+        ? mek.message.conversation
+        : type === "extendedTextMessage"
+        ? mek.message.extendedTextMessage.text
+        : type == "imageMessage" && mek.message.imageMessage.caption
+        ? mek.message.imageMessage.caption
+        : type == "videoMessage" && mek.message.videoMessage.caption
+        ? mek.message.videoMessage.caption
+        : "";
+    const isCmd = body.startsWith(prefix);
+    const command = isCmd
+      ? body.slice(prefix.length).trim().split(" ").shift().toLowerCase()
+      : "";
+    const args = body.trim().split(/ +/).slice(1);
+    const q = args.join(" ");
+    const isGroup = from.endsWith("@g.us");
+    const sender = mek.key.fromMe
+      ? robin.user.id.split(":")[0] + "@s.whatsapp.net" || robin.user.id
+      : mek.key.participant || mek.key.remoteJid;
+    const senderNumber = sender.split("@")[0];
+    const botNumber = robin.user.id.split(":")[0];
+    const pushname = mek.pushName || "Sin Nombre";
+    const isMe = botNumber.includes(senderNumber);
+    const isOwner = ownerNumber.includes(senderNumber) || isMe;
+    const botNumber2 = await jidNormalizedUser(robin.user.id);
+    const groupMetadata = isGroup
+      ? await robin.groupMetadata(from).catch((e) => {})
+      : "";
+    const groupName = isGroup ? groupMetadata.subject : "";
+    const participants = isGroup ? await groupMetadata.participants : "";
+    const groupAdmins = isGroup ? await getGroupAdmins(participants) : "";
+    const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false;
+    const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
+    const isReact = m.message.reactionMessage ? true : false;
+    const reply = (teks) => {
+      robin.sendMessage(from, { text: teks }, { quoted: mek });
+    };
 
-// Start bot after a delay
-setTimeout(connectToWA, 4000);
+    robin.sendFileUrl = async (jid, url, caption, quoted, options = {}) => {
+      let mime = "";
+      let res = await axios.head(url);
+      mime = res.headers["content-type"];
+      if (mime.split("/")[1] === "gif") {
+        return robin.sendMessage(
+          jid,
+          {
+            video: await getBuffer(url),
+            caption: caption,
+            gifPlayback: true,
+            ...options,
+          },
+          { quoted: quoted, ...options }
+        );
+      }
+      let type = mime.split("/")[0] + "Message";
+      if (mime === "application/pdf") {
+        return robin.sendMessage(
+          jid,
+          {
+            document: await getBuffer(url),
+            mimetype: "application/pdf",
+            caption: caption,
+            ...options,
+          },
+          { quoted: quoted, ...options }
+        );
+      }
+      if (mime.split("/")[0] === "image") {
+        return robin.sendMessage(
+          jid,
+          { image: await getBuffer(url), caption: caption, ...options },
+          { quoted: quoted, ...options }
+        );
+      }
+      if (mime.split("/")[0] === "video") {
+        return robin.sendMessage(
+          jid,
+          {
+            video: await getBuffer(url),
+            caption: caption,
+            mimetype: "video/mp4",
+            ...options,
+          },
+          { quoted: quoted, ...options }
+        );
+      }
+      if (mime.split("/")[0] === "audio") {
+        return robin.sendMessage(
+          jid,
+          {
+            audio: await getBuffer(url),
+            caption: caption,
+            mimetype: "audio/mpeg",
+            ...options,
+          },
+          { quoted: quoted, ...options }
+        );
+      }
+    };
+
+    //work type
+    if (!isOwner && config.MODE === "private") return;
+    if (!isOwner && isGroup && config.MODE === "inbox") return;
+    if (!isOwner && !isGroup && config.MODE === "groups") return;
+
+    const events = require("./command");
+    const cmdName = isCmd
+      ? body.slice(1).trim().split(" ")[0].toLowerCase()
+      : false;
+    if (isCmd) {
+      const cmd =
+        events.commands.find((cmd) => cmd.pattern === cmdName) ||
+        events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName));
+      if (cmd) {
+        if (cmd.react)
+          robin.sendMessage(from, { react: { text: cmd.react, key: mek.key } });
+
+        try {
+          cmd.function(robin, mek, m, {
+            from,
+            quoted,
+            body,
+            isCmd,
+            command,
+            args,
+            q,
+            isGroup,
+            sender,
+            senderNumber,
+            botNumber2,
+            botNumber,
+            pushname,
+            isMe,
+            isOwner,
+            groupMetadata,
+            groupName,
+            participants,
+            groupAdmins,
+            isBotAdmins,
+            isAdmins,
+            reply,
+          });
+        } catch (e) {
+          console.error("[PLUGIN ERROR] " + e);
+        }
+      }
+    }
+    events.commands.map(async (command) => {
+      if (body && command.on === "body") {
+        command.function(robin, mek, m, {
+          from,
+          l,
+          quoted,
+          body,
+          isCmd,
+          command,
+          args,
+          q,
+          isGroup,
+          sender,
+          senderNumber,
+          botNumber2,
+          botNumber,
+          pushname,
+          isMe,
+          isOwner,
+          groupMetadata,
+          groupName,
+          participants,
+          groupAdmins,
+          isBotAdmins,
+          isAdmins,
+          reply,
+        });
+      } else if (mek.q && command.on === "text") {
+        command.function(robin, mek, m, {
+          from,
+          l,
+          quoted,
+          body,
+          isCmd,
+          command,
+          args,
+          q,
+          isGroup,
+          sender,
+          senderNumber,
+          botNumber2,
+          botNumber,
+          pushname,
+          isMe,
+          isOwner,
+          groupMetadata,
+          groupName,
+          participants,
+          groupAdmins,
+          isBotAdmins,
+          isAdmins,
+          reply,
+        });
+      } else if (
+        (command.on === "image" || command.on === "photo") &&
+        mek.type === "imageMessage"
+      ) {
+        command.function(robin, mek, m, {
+          from,
+          l,
+          quoted,
+          body,
+          isCmd,
+          command,
+          args,
+          q,
+          isGroup,
+          sender,
+          senderNumber,
+          botNumber2,
+          botNumber,
+          pushname,
+          isMe,
+          isOwner,
+          groupMetadata,
+          groupName,
+          participants,
+          groupAdmins,
+          isBotAdmins,
+          isAdmins,
+          reply,
+        });
+      } else if (command.on === "sticker" && mek.type === "stickerMessage") {
+        command.function(robin, mek, m, {
+          from,
+          l,
+          quoted,
+          body,
+          isCmd,
+          command,
+          args,
+          q,
+          isGroup,
+          sender,
+          senderNumber,
+          botNumber2,
+          botNumber,
+          pushname,
+          isMe,
+          isOwner,
+          groupMetadata,
+          groupName,
+          participants,
+          groupAdmins,
+          isBotAdmins,
+          isAdmins,
+          reply,
+        });
+      }
+    });
+    //============================================================================
+  });
+}
+app.get("/", (req, res) => {
+  res.send("hey,i'm started✅");
+});
+app.listen(port, () =>
+  console.log(`Server listening on port http://localhost:${port}`)
+);
+setTimeout(() => {
+  connectToWA();
+}, 4000);
