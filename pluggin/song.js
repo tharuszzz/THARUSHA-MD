@@ -1,4 +1,4 @@
-```const config = require('../config');
+const config = require('../config');
 const { cmd } = require('../command');
 const DY_SCRAP = require('@dark-yasiya/scrap');
 const dy_scrap = new DY_SCRAP();
@@ -99,4 +99,3 @@ cmd({
         await reply(`❌ *An error occurred:* ${error.message || "Error!"}`);
     }
 });
-```
